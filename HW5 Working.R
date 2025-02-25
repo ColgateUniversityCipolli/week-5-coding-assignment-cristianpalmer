@@ -1,8 +1,6 @@
 ################ 
 #Homework Number 5
-#Fixed Issue where code 
-#would not run by replacing 
-#Json_file with Json_file_Adios
+#Fixed Issue where code would not run by replacing Json_file with Json_file_Adios
 ################ 
 
 ################ Step 2
@@ -26,8 +24,6 @@ song_name_with.json_Adios = (split_Json_file_Adios[3])
 track_Adios <- str_sub(song_name_with.json_Adios, 1, str_length(song_name_with.json_Adios) - 5)
 artist_Adios = (split_Json_file_Adios[1])
 album_Adios = (split_Json_file_Adios[2])
-
-
 
 ################ Part 3
 #changes#
