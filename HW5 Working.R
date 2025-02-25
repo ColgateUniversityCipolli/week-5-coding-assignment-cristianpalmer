@@ -132,31 +132,44 @@ for (i in 1:length(json_files_new)) {
 Essentia_Output_Original <- read_csv("EssentiaOutput/EssentiaModelOutput.csv")
 
 ################ Step 3 Part 2
-Essentia_Output_Original$arousal = (Essentia_Output_Original$emo_arousal+Essentia_Output_Original$deam_arousal+Essentia_Output_Original$muse_arousal)/3
-Essentia_Output_Original$valence = (Essentia_Output_Original$deam_valence+Essentia_Output_Original$emo_valence+Essentia_Output_Original$muse_valence)/3
+#changes#
+#used mutate to create new columns
+Essentia_Output_Original <- Essentia_Output_Original |>
+  mutate(arousal = (emo_arousal + deam_arousal + muse_arousal) / 3) |>
+  mutate(valence = (emo_valence  + deam_valence + muse_valence)/ 3) |>
 
 ################ Step 3 Part 3
-Essentia_Output_Original$aggressive = (Essentia_Output_Original$nn_aggressive+Essentia_Output_Original$eff_aggressive)/2
-Essentia_Output_Original$happy = (Essentia_Output_Original$nn_happy+Essentia_Output_Original$eff_happy)/2
-Essentia_Output_Original$party = (Essentia_Output_Original$nn_party+Essentia_Output_Original$eff_party)/2
-Essentia_Output_Original$relaxed = (Essentia_Output_Original$nn_relax+Essentia_Output_Original$eff_relax)/2
-Essentia_Output_Original$sad = (Essentia_Output_Original$nn_sad+ Essentia_Output_Original$eff_sad)/2
-
+#changes#
+#used mutate to create new columns
+  mutate(aggressive = (nn_aggressive  + eff_aggressive)/ 2) |>
+  mutate(happy = (nn_happy  + eff_happy)/ 2) |>
+  mutate(party = (nn_party  + eff_party)/ 2) |>
+  mutate(relaxed = (nn_relax  + eff_relax)/ 2) |>
+  mutate(sad = (nn_sad  + eff_sad)/ 2) |>
+  
 ################ Step 3 Part 4
-Essentia_Output_Original$acoustic = (Essentia_Output_Original$nn_acoustic+Essentia_Output_Original$eff_acoustic)/2
-Essentia_Output_Original$electric = (Essentia_Output_Original$nn_electronic+Essentia_Output_Original$eff_electronic)/2
-
+#changes#
+#used mutate to create new columns
+  mutate(acoustic =(nn_acoustic + eff_acoustic)/ 2) |>
+  mutate(electric =(nn_electronic + eff_electronic)/ 2) |>
+  
 ################ Step 3 Part 5
-Essentia_Output_Original$instrumental = (Essentia_Output_Original$nn_instrumental+Essentia_Output_Original$eff_instrumental)/2
-
+#changes#
+#used mutate to create new columns
+  mutate(instrumental =(nn_instrumental + eff_instrumental)/ 2) |>
+  
 ################ Step 3 Part 6
-colnames(Essentia_Output_Original)[colnames(Essentia_Output_Original) == "eff_timbre_bright"] = "timbreBright"
+#changes#
+#used rename in the pipe to rename the column
+  rename(timbreBright = eff_timbre_bright )
 
 ################ Step 3 Part 7
-Essentia_Output_New <- Essentia_Output_Original[c("artist", "album", "track", "arousal", 
-                                                  "valence", "aggressive", "happy","party","relaxed",
-                                                  "sad", "acoustic","electric","instrumental",
-                                                  "timbreBright")]
+#changes#
+#Used select() function and pipe
+Essentia_Output_New <- Essentia_Output_Original |>
+  select(artist, album, track, arousal, valence, aggressive, happy, party, relaxed,
+         sad, acoustic, electric, instrumental, timbreBright)
+
 
 ################ Step 4 Part 1
 #changes#
@@ -174,5 +187,3 @@ Final_Merged_df <- Merged_df_1 |>
 #changes#
 #Used rename() function and ran it through a pipe
     rename(funct = `function`)
-
-
