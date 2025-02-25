@@ -6,7 +6,7 @@
 ################ Step 2
 #changes#
 #Added in the tidyverse library
-library("stringr")
+#Removed library("stringr") since it is included in "tidyverse"
 library("jsonlite")
 library("tidyverse")
 

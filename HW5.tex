@@ -79,6 +79,191 @@ runs in the directory as it is set up.
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlcom{# Code to run here.}
+\hlcom{################ }
+\hlcom{#Homework Number 5}
+\hlcom{#Fixed Issue where code would not run by replacing Json_file with Json_file_Adios}
+\hlcom{################ }
+
+\hlcom{################ Step 2}
+\hlcom{#changes#}
+\hlcom{#Added in the tidyverse library}
+\hlcom{#Removed library("stringr") since it is included in "tidyverse"}
+\hlkwd{library}\hldef{(}\hlsng{"jsonlite"}\hldef{)}
+\hlkwd{library}\hldef{(}\hlsng{"tidyverse"}\hldef{)}
+
+\hlcom{################ Part 1}
+\hlcom{#changes#}
+\hlcom{#No change necessary, this step is just assigning a variable }
+\hldef{Json_file_Adios} \hlkwb{<-} \hlsng{"The Front Bottoms-Talon Of The Hawk-Au Revoir (Adios).json"}
+
+\hlcom{################ Part 2}
+\hlcom{#changes#}
+\hlcom{#Took out Pastes since they were unnecessary}
+\hlcom{#Since this is using Stringr already, which is part of tidyverse, this step is already being done with tidyverse}
+\hldef{split_Json_file_Adios} \hlkwb{<-} \hlkwd{str_split}\hldef{(Json_file_Adios,} \hlsng{"-"}\hldef{,} \hlkwc{simplify} \hldef{=} \hlnum{TRUE}\hldef{)}
+\hldef{song_name_with.json_Adios} \hlkwb{=} \hldef{(split_Json_file_Adios[}\hlnum{3}\hldef{])}
+\hldef{track_Adios} \hlkwb{<-} \hlkwd{str_sub}\hldef{(song_name_with.json_Adios,} \hlnum{1}\hldef{,} \hlkwd{str_length}\hldef{(song_name_with.json_Adios)} \hlopt{-} \hlnum{5}\hldef{)}
+\hldef{artist_Adios} \hlkwb{=} \hldef{(split_Json_file_Adios[}\hlnum{1}\hldef{])}
+\hldef{album_Adios} \hlkwb{=} \hldef{(split_Json_file_Adios[}\hlnum{2}\hldef{])}
+
+\hlcom{################ Part 3}
+\hlcom{#changes#}
+\hlcom{#No change necessary, this step is just assigning a variable }
+\hldef{JSON_Data} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(}\hlkwd{paste}\hldef{(}\hlsng{"EssentiaOutput"}\hldef{,}\hlsng{"/"}\hldef{, Json_file_Adios,} \hlkwc{sep} \hldef{=}\hlsng{""}\hldef{))}
+
+\hlcom{################ Part 4}
+\hlcom{#changes#}
+\hlcom{#Used the pluck() function and introduced pipes}
+\hldef{overall_loudness}  \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"loudness_ebu128"}\hldef{,} \hlsng{"integrated"}\hldef{)}
+\hldef{spectral_energy}   \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"spectral_energy"}\hldef{)}
+\hldef{dissonance}        \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"dissonance"}\hldef{)}
+\hldef{danceability}      \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"rhythm"}\hldef{,} \hlsng{"danceability"}\hldef{)}
+\hldef{pitch_salience}    \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"pitch_salience"}\hldef{)}
+\hldef{bpm}               \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"rhythm"}\hldef{,} \hlsng{"bpm"}\hldef{)}
+\hldef{beats_loudness}    \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"rhythm"}\hldef{,} \hlsng{"beats_loudness"}\hldef{)}
+\hldef{tuning_frequency}  \hlkwb{<-} \hldef{JSON_Data |>}
+  \hlkwd{pluck}\hldef{(}\hlsng{"tonal"}\hldef{,} \hlsng{"tuning_frequency"}\hldef{)}
+
+\hlcom{################ Step 2}
+\hlcom{# artist album track}
+\hlcom{#changes#}
+\hlcom{#Changed my data frame to a tibble}
+\hldef{df_notplot} \hlkwb{<-} \hlkwd{tibble}\hldef{(}
+  \hlkwc{artist} \hldef{=} \hlkwd{character}\hldef{(),} \hlkwc{album} \hldef{=} \hlkwd{character}\hldef{(),} \hlkwc{track} \hldef{=} \hlkwd{character}\hldef{(),}
+  \hlkwc{overall_loudness} \hldef{=} \hlkwd{numeric}\hldef{(),} \hlkwc{spectral_energy} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{dissonance} \hldef{=} \hlkwd{numeric}\hldef{(),} \hlkwc{danceability} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{pitch_salience} \hldef{=} \hlkwd{numeric}\hldef{(),} \hlkwc{bpm} \hldef{=} \hlkwd{numeric}\hldef{(),}
+  \hlkwc{beats_loudness} \hldef{=} \hlkwd{numeric}\hldef{(),} \hlkwc{tuning_frequency} \hldef{=} \hlkwd{numeric}\hldef{()}
+\hldef{)}
+\hlcom{# Create a data frame to save the results}
+\hldef{essentia_files} \hlkwb{<-} \hlkwd{list.files}\hldef{(}\hlkwc{path} \hldef{=} \hlsng{"EssentiaOutput/"}\hldef{)}
+\hldef{json_files_new} \hlkwb{<-} \hldef{essentia_files[}\hlkwd{str_count}\hldef{(essentia_files,} \hlsng{".json"}\hldef{)}\hlopt{==}\hlnum{1}\hldef{]}
+\hlcom{#changes#}
+\hlcom{#Took out pastes that were not necessary}
+\hlcom{#This step is already using tidyverse since it is using stringr which is a part of tidyverse}
+\hlkwa{for} \hldef{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{length}\hldef{(json_files_new)) \{}
+  \hldef{current_filename} \hlkwb{=} \hldef{json_files_new[i]}
+  \hldef{split_Json_file} \hlkwb{<-} \hlkwd{str_split}\hldef{(current_filename,} \hlsng{"-"}\hldef{,} \hlkwc{simplify} \hldef{=} \hlnum{TRUE}\hldef{)}
+  \hldef{song_name_with.json} \hlkwb{=} \hldef{(split_Json_file[}\hlnum{3}\hldef{])}
+  \hldef{track} \hlkwb{<-} \hlkwd{str_sub}\hldef{(song_name_with.json,} \hlnum{1}\hldef{,} \hlkwd{str_length}\hldef{(song_name_with.json)} \hlopt{-} \hlnum{5}\hldef{)}
+  \hldef{artist} \hlkwb{=} \hldef{(split_Json_file[}\hlnum{1}\hldef{])}
+  \hldef{album} \hlkwb{=} \hldef{(split_Json_file[}\hlnum{2}\hldef{])}
+  \hlcom{# remove .json from the song}
+  \hlcom{# save artist/album/track}
+
+
+
+  \hlcom{# Read in the file as JSON_DataVie  JSON_Data_New <- fromJSON(paste("json_files_new","/", i, sep =""))}
+  \hldef{JSON_Data_New} \hlkwb{<-} \hlkwd{fromJSON}\hldef{(}\hlkwd{paste0}\hldef{(}\hlsng{"EssentiaOutput/"}\hldef{,current_filename))}
+\hlcom{#changes#}
+\hlcom{#Used the pluck() function and introduced pipes}
+  \hldef{overall_loudness}  \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"loudness_ebu128"}\hldef{,} \hlsng{"integrated"}\hldef{)}
+  \hldef{spectral_energy}   \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"spectral_energy"}\hldef{)}
+  \hldef{dissonance}        \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"dissonance"}\hldef{)}
+  \hldef{danceability}      \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"rhythm"}\hldef{,} \hlsng{"danceability"}\hldef{)}
+  \hldef{pitch_salience}    \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"lowlevel"}\hldef{,} \hlsng{"pitch_salience"}\hldef{)}
+  \hldef{bpm}               \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"rhythm"}\hldef{,} \hlsng{"bpm"}\hldef{)}
+  \hldef{beats_loudness}    \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"rhythm"}\hldef{,} \hlsng{"beats_loudness"}\hldef{)}
+  \hldef{tuning_frequency}  \hlkwb{<-} \hldef{JSON_Data_New |>}
+    \hlkwd{pluck}\hldef{(}\hlsng{"tonal"}\hldef{,} \hlsng{"tuning_frequency"}\hldef{)}
+
+\hlcom{# Save the results to the ith row of the data frame}
+\hlcom{#changes#}
+\hlcom{#Changed data frame to a tibble and used bind_rows() instead of rbind()}
+\hlcom{#Removed column renaming since doing the dataframe this way solved the }
+\hlcom{#issue which caused me to have to rename some columns in the first place}
+  \hldef{df_notplot} \hlkwb{<-} \hldef{df_notplot} \hlopt{%>%}
+    \hlkwd{bind_rows}\hldef{(}\hlkwd{tibble}\hldef{(}
+      \hlkwc{artist} \hldef{= artist,}
+      \hlkwc{album} \hldef{= album,}
+      \hlkwc{track} \hldef{= track,}
+      \hlkwc{overall_loudness} \hldef{=} \hlkwd{as.numeric}\hldef{(overall_loudness),}
+      \hlkwc{spectral_energy} \hldef{=} \hlkwd{as.numeric}\hldef{(spectral_energy),}
+      \hlkwc{dissonance} \hldef{=} \hlkwd{as.numeric}\hldef{(dissonance),}
+      \hlkwc{danceability} \hldef{=} \hlkwd{as.numeric}\hldef{(danceability),}
+      \hlkwc{pitch_salience} \hldef{=} \hlkwd{as.numeric}\hldef{(pitch_salience),}
+      \hlkwc{bpm} \hldef{=} \hlkwd{as.numeric}\hldef{(bpm),}
+      \hlkwc{beats_loudness} \hldef{=} \hlkwd{as.numeric}\hldef{(beats_loudness),}
+      \hlkwc{tuning_frequency} \hldef{=} \hlkwd{as.numeric}\hldef{(tuning_frequency)}
+    \hldef{))}
+\hldef{\}}
+
+
+\hlcom{################ Step 3 Part 1}
+\hlcom{#changes#}
+\hlcom{#changed read.csv() to read_csv()}
+\hldef{Essentia_Output_Original} \hlkwb{<-} \hlkwd{read_csv}\hldef{(}\hlsng{"EssentiaOutput/EssentiaModelOutput.csv"}\hldef{)}
+
+\hlcom{################ Step 3 Part 2}
+\hlcom{#changes#}
+\hlcom{#used mutate to create new columns}
+\hldef{Essentia_Output_Original} \hlkwb{<-} \hldef{Essentia_Output_Original |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{arousal} \hldef{= (emo_arousal} \hlopt{+} \hldef{deam_arousal} \hlopt{+} \hldef{muse_arousal)} \hlopt{/} \hlnum{3}\hldef{) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{valence} \hldef{= (emo_valence}  \hlopt{+} \hldef{deam_valence} \hlopt{+} \hldef{muse_valence)}\hlopt{/} \hlnum{3}\hldef{) |>}
+
+\hlcom{################ Step 3 Part 3}
+\hlcom{#changes#}
+\hlcom{#used mutate to create new columns}
+  \hlkwd{mutate}\hldef{(}\hlkwc{aggressive} \hldef{= (nn_aggressive}  \hlopt{+} \hldef{eff_aggressive)}\hlopt{/} \hlnum{2}\hldef{) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{happy} \hldef{= (nn_happy}  \hlopt{+} \hldef{eff_happy)}\hlopt{/} \hlnum{2}\hldef{) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{party} \hldef{= (nn_party}  \hlopt{+} \hldef{eff_party)}\hlopt{/} \hlnum{2}\hldef{) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{relaxed} \hldef{= (nn_relax}  \hlopt{+} \hldef{eff_relax)}\hlopt{/} \hlnum{2}\hldef{) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{sad} \hldef{= (nn_sad}  \hlopt{+} \hldef{eff_sad)}\hlopt{/} \hlnum{2}\hldef{) |>}
+
+\hlcom{################ Step 3 Part 4}
+\hlcom{#changes#}
+\hlcom{#used mutate to create new columns}
+  \hlkwd{mutate}\hldef{(}\hlkwc{acoustic} \hldef{=(nn_acoustic} \hlopt{+} \hldef{eff_acoustic)}\hlopt{/} \hlnum{2}\hldef{) |>}
+  \hlkwd{mutate}\hldef{(}\hlkwc{electric} \hldef{=(nn_electronic} \hlopt{+} \hldef{eff_electronic)}\hlopt{/} \hlnum{2}\hldef{) |>}
+
+\hlcom{################ Step 3 Part 5}
+\hlcom{#changes#}
+\hlcom{#used mutate to create new columns}
+  \hlkwd{mutate}\hldef{(}\hlkwc{instrumental} \hldef{=(nn_instrumental} \hlopt{+} \hldef{eff_instrumental)}\hlopt{/} \hlnum{2}\hldef{) |>}
+
+\hlcom{################ Step 3 Part 6}
+\hlcom{#changes#}
+\hlcom{#used rename in the pipe to rename the column}
+  \hlkwd{rename}\hldef{(}\hlkwc{timbreBright} \hldef{= eff_timbre_bright )}
+
+\hlcom{################ Step 3 Part 7}
+\hlcom{#changes#}
+\hlcom{#Used select() function and pipe}
+\hldef{Essentia_Output_New} \hlkwb{<-} \hldef{Essentia_Output_Original |>}
+  \hlkwd{select}\hldef{(artist, album, track, arousal, valence, aggressive, happy, party, relaxed,}
+         \hldef{sad, acoustic, electric, instrumental, timbreBright)}
+
+
+\hlcom{################ Step 4 Part 1}
+\hlcom{#changes#}
+\hlcom{#changed read.csv() to read_csv()}
+\hldef{LIWC_Output} \hlkwb{<-} \hlkwd{read_csv}\hldef{(}\hlsng{"LIWCOutput/LIWCOutput.csv"}\hldef{)}
+
+\hlcom{################ Step 4 Part 2}
+\hlcom{#changes#}
+\hlcom{#Used full_join() instead of merge() and introduced pipes}
+\hldef{Merged_df_1} \hlkwb{<-} \hldef{df_notplot |>}
+  \hlkwd{full_join}\hldef{(Essentia_Output_New,} \hlkwc{by} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"artist"}\hldef{,} \hlsng{"album"}\hldef{,} \hlsng{"track"}\hldef{))}
+\hldef{Final_Merged_df} \hlkwb{<-} \hldef{Merged_df_1 |>}
+  \hlkwd{full_join}\hldef{(LIWC_Output,} \hlkwc{by} \hldef{=} \hlkwd{c}\hldef{(}\hlsng{"artist"}\hldef{,} \hlsng{"album"}\hldef{,} \hlsng{"track"}\hldef{)) |>}
+\hlcom{################ Step 4 Part 3}
+\hlcom{#changes#}
+\hlcom{#Used rename() function and ran it through a pipe}
+    \hlkwd{rename}\hldef{(}\hlkwc{funct} \hldef{= `function`)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
