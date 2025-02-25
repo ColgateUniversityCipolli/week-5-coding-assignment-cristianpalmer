@@ -127,7 +127,9 @@ for (i in 1:length(json_files_new)) {
 
 
 ################ Step 3 Part 1
-Essentia_Output_Original <- read.csv("EssentiaOutput/EssentiaModelOutput.csv")
+#changes#
+#changed read.csv() to read_csv()
+Essentia_Output_Original <- read_csv("EssentiaOutput/EssentiaModelOutput.csv")
 
 ################ Step 3 Part 2
 Essentia_Output_Original$arousal = (Essentia_Output_Original$emo_arousal+Essentia_Output_Original$deam_arousal+Essentia_Output_Original$muse_arousal)/3
@@ -157,11 +159,20 @@ Essentia_Output_New <- Essentia_Output_Original[c("artist", "album", "track", "a
                                                   "timbreBright")]
 
 ################ Step 4 Part 1
-LIWC_Output <- read.csv("LIWCOutput/LIWCOutput.csv")
+#changes#
+#changed read.csv() to read_csv()
+LIWC_Output <- read_csv("LIWCOutput/LIWCOutput.csv")
 
 ################ Step 4 Part 2
-Merged_df_1 <- merge(df_notplot,Essentia_Output_New, by = c("artist", "album", "track"), all = TRUE)
-Final_Merged_df <- merge(Merged_df_1,LIWC_Output, by = c("artist", "album", "track"), all = TRUE)
-
+#changes#
+#Used full_join() instead of merge() and introduced pipes
+Merged_df_1 <- df_notplot |>
+  full_join(Essentia_Output_New, by = c("artist", "album", "track"))
+Final_Merged_df <- Merged_df_1 |>
+  full_join(LIWC_Output, by = c("artist", "album", "track")) |>
 ################ Step 4 Part 3
-colnames(Final_Merged_df)[colnames(Final_Merged_df) == "function."] = "funct"
+#changes#
+#Used rename() function and ran it through a pipe
+    rename(funct = `function`)
+
+
