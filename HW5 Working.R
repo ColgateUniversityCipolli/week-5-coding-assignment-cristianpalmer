@@ -6,33 +6,53 @@
 ################ 
 
 ################ Step 2
+#changes#
+#Added in the tidyverse library
 library("stringr")
 library("jsonlite")
+library("tidyverse")
 
 ################ Part 1
+#changes#
+#No change necessary, this step is just assigning a variable 
 Json_file_Adios <- "The Front Bottoms-Talon Of The Hawk-Au Revoir (Adios).json"
 
 ################ Part 2
-split_Json_file_Adios <- str_split(Json_file_Adios, "-", simplify = TRUE)
-song_name_with.json_Adios = (paste(split_Json_file_Adios[3]))
+#changes#
+#Took out Pastes since they were unnecessary
+#Since this is using Stringr already, which is part of tidyverse, this step is already being done with tidyverse
+split_Json_file_Adios <- str_split(Json_file_Adios, "-", simplify = TRUE) 
+song_name_with.json_Adios = (split_Json_file_Adios[3])
 track_Adios <- str_sub(song_name_with.json_Adios, 1, str_length(song_name_with.json_Adios) - 5)
-artist_Adios = (paste(split_Json_file_Adios[1]))
-album_Adios = (paste(split_Json_file_Adios[2]))
+artist_Adios = (split_Json_file_Adios[1])
+album_Adios = (split_Json_file_Adios[2])
 
 
 
 ################ Part 3
+#changes#
+#No change necessary, this step is just assigning a variable 
 JSON_Data <- fromJSON(paste("EssentiaOutput","/", Json_file_Adios, sep =""))
 
 ################ Part 4
-overall_loudness = JSON_Data$lowlevel$loudness_ebu128$integrated
-spectral_energy = JSON_Data$lowlevel$spectral_energy
-dissonance = JSON_Data$lowlevel$dissonance
-danceability = JSON_Data$rhythm$danceability
-pitch_salience = JSON_Data$lowlevel$pitch_salience
-bpm = JSON_Data$rhythm$bpm
-beats_loudness = JSON_Data$rhythm$beats_loudness
-tuning_frequency = JSON_Data$tonal$tuning_frequency
+#changes#
+#Used the pluck() function and introduced pipes
+overall_loudness  <- JSON_Data |> 
+  pluck("lowlevel", "loudness_ebu128", "integrated")
+spectral_energy   <- JSON_Data |>
+  pluck("lowlevel", "spectral_energy")
+dissonance        <- JSON_Data |>
+  pluck("lowlevel", "dissonance")
+danceability      <- JSON_Data |>
+  pluck("rhythm", "danceability")
+pitch_salience    <- JSON_Data |>
+  pluck("lowlevel", "pitch_salience")
+bpm               <- JSON_Data |>
+  pluck("rhythm", "bpm")
+beats_loudness    <- JSON_Data |>
+  pluck("rhythm", "beats_loudness")
+tuning_frequency  <- JSON_Data |>
+  pluck("tonal", "tuning_frequency")
 
 ################ Step 2
 # artist album track
@@ -122,228 +142,3 @@ Final_Merged_df <- merge(Merged_df_1,LIWC_Output, by = c("artist", "album", "tra
 
 ################ Step 4 Part 3
 colnames(Final_Merged_df)[colnames(Final_Merged_df) == "function."] = "funct"
-
-################ Step 5 Part 1
-write.csv(json_files_new[-120], "trainingdata.csv")
-trainingdata.csv = read.csv("trainingdata.csv")
-
-################ Step 5 Part 2
-write.csv(json_files_new[120], "testingdata.csv")
-testingdata.csv = read.csv("testingdata.csv")
-
-
-################ Task 3
-write.csv(Final_Merged_df, "Final_Merged_df.csv")
-
-
-################################################################################
-#PLOTS
-################################################################################
-
-
-################ Plot 1
-library(tidyverse)
-####################################
-# Load Data
-####################################
-dat <- read_csv("Final_Merged_df.csv")
-####################################
-# Select data for plot
-####################################
-df <- dat %>%
-  dplyr::select("bpm", "artist") %>%
-  filter(!is.na(!!sym("artist"))) %>%
-  mutate(denoted.group = paste("artist", " = ", !!sym("artist"), sep = ""))
-####################################
-# Create Plot
-####################################
-p <- ggplot(df, aes(x = !!sym("bpm"), y = after_stat(!!sym("density")))) +
-  geom_histogram(breaks = seq(67, 185, length.out = 17), color = "grey30", fill = "lightblue") +
-  geom_density(alpha = 0.2, trim = FALSE) +
-  get("theme_classic")() +
-  xlab("BPM") +
-  ylab("Density") +
-  ggtitle("Danceability For Each Artist", "") +
-  geom_hline(yintercept = 0) +
-  facet_wrap(~denoted.group, ncol =1)
-####################################
-# Print Plot
-####################################
-p
-####################################
-# Summarize Data
-####################################
-dat.summary <- dat %>%
-  select(!!sym("bpm"), !!sym("artist")) %>%
-  group_by(!!sym("artist")) %>%
-  summarize(Observations = sum(!is.na(!!sym("bpm"))), Mean = mean(!!sym("bpm"), na.rm = T), `Standard Deviation` = sd(!!sym("bpm"), na.rm = T), Min = min(!!sym("bpm"), na.rm = T), Q1 = quantile(!!sym("bpm"), probs = 0.25, na.rm = T), Median = median(!!sym("bpm"), na.rm = T), Q3 = quantile(!!sym("bpm"), probs = 0.75, na.rm = T), Max = max(!!sym("bpm"), na.rm = T), IQR = IQR(!!sym("bpm"), na.rm = T)) %>%
-  filter(!is.na(!!sym("artist"))) %>%
-  tidyr::complete(!!sym("artist")) %>%
-  mutate_if(is.numeric, round, 4)
-missing.obs <- dat %>%
-  summarize(missing = sum(is.na(!!sym("bpm")) | is.na(!!sym("artist")))) %>%
-  pull(missing)
-dat.summary <- dat.summary %>%
-  ungroup() %>%
-  add_row(`:=`(!!sym("artist"), "Rows with Missing Data"), Observations = missing.obs, Mean = NA, `Standard Deviation` = NA, Min = NA, Q1 = NA, Median = NA, Q3 = NA, Max = NA, IQR = NA)
-####################################
-# Print Data Summary
-####################################
-dat.summary
-
-
-
-
-
-
-################ Plot 2
-# Load Data
-####################################
-dat <- read_csv("Final_Merged_df.csv")
-####################################
-# Select data for plot
-####################################
-df <- dat %>%
-  dplyr::select("acoustic", "artist") %>%
-  filter(!is.na(!!sym("artist"))) %>%
-  mutate(denoted.group = paste("artist", " = ", !!sym("artist"), sep = ""))
-####################################
-# Create Plot
-####################################
-p <- ggplot(df, aes(x = !!sym("acoustic"), y = after_stat(!!sym("density")))) +
-  geom_histogram(breaks = seq(0, 1, length.out = 17), color = "grey30", fill = "lightblue") +
-  geom_density(alpha = 0.2, trim = FALSE) +
-  get("theme_classic")() +
-  xlab("Acoustic") +
-  ylab("Density") +
-  ggtitle("Acousticness per Artist", "") +
-  geom_hline(yintercept = 0) +
-  facet_wrap(~denoted.group, ncol=1)
-####################################
-# Print Plot
-####################################
-p
-####################################
-# Summarize Data
-####################################
-dat.summary <- dat %>%
-  select(!!sym("acoustic"), !!sym("artist")) %>%
-  group_by(!!sym("artist")) %>%
-  summarize(Observations = sum(!is.na(!!sym("acoustic"))), Mean = mean(!!sym("acoustic"), na.rm = T), `Standard Deviation` = sd(!!sym("acoustic"), na.rm = T), Min = min(!!sym("acoustic"), na.rm = T), Q1 = quantile(!!sym("acoustic"), probs = 0.25, na.rm = T), Median = median(!!sym("acoustic"), na.rm = T), Q3 = quantile(!!sym("acoustic"), probs = 0.75, na.rm = T), Max = max(!!sym("acoustic"), na.rm = T), IQR = IQR(!!sym("acoustic"), na.rm = T)) %>%
-  filter(!is.na(!!sym("artist"))) %>%
-  tidyr::complete(!!sym("artist")) %>%
-  mutate_if(is.numeric, round, 4)
-missing.obs <- dat %>%
-  summarize(missing = sum(is.na(!!sym("acoustic")) | is.na(!!sym("artist")))) %>%
-  pull(missing)
-dat.summary <- dat.summary %>%
-  ungroup() %>%
-  add_row(`:=`(!!sym("artist"), "Rows with Missing Data"), Observations = missing.obs, Mean = NA, `Standard Deviation` = NA, Min = NA, Q1 = NA, Median = NA, Q3 = NA, Max = NA, IQR = NA)
-####################################
-# Print Data Summary
-####################################
-dat.summary
-
-
-
-
-
-
-################ Plot 3
-# Load Data
-####################################
-dat <- read_csv("Final_Merged_df.csv")
-####################################
-# Select data for plot
-####################################
-df <- dat %>%
-  dplyr::select("aggressive", "artist") %>%
-  filter(!is.na(!!sym("artist")))
-####################################
-# Create Plot
-####################################
-p <- ggplot(df, aes(x = !!sym("artist"), y = !!sym("aggressive"))) +
-  geom_boxplot(fill = "lightblue", width = 0.5) +
-  get("theme_classic")() +
-  xlab("Artist") +
-  ylab("Aggressiveness") +
-  ggtitle("Agressiveness per Artist", "")
-####################################
-# Print Plot
-####################################
-p
-####################################
-# Summarize Data
-####################################
-dat.summary <- dat %>%
-  select(!!sym("aggressive"), !!sym("artist")) %>%
-  group_by(!!sym("artist")) %>%
-  summarize(Observations = sum(!is.na(!!sym("aggressive"))), Mean = mean(!!sym("aggressive"), na.rm = T), `Standard Deviation` = sd(!!sym("aggressive"), na.rm = T), Min = min(!!sym("aggressive"), na.rm = T), Q1 = quantile(!!sym("aggressive"), probs = 0.25, na.rm = T), Median = median(!!sym("aggressive"), na.rm = T), Q3 = quantile(!!sym("aggressive"), probs = 0.75, na.rm = T), Max = max(!!sym("aggressive"), na.rm = T), IQR = IQR(!!sym("aggressive"), na.rm = T)) %>%
-  filter(!is.na(!!sym("artist"))) %>%
-  tidyr::complete(!!sym("artist")) %>%
-  mutate_if(is.numeric, round, 4)
-missing.obs <- dat %>%
-  summarize(missing = sum(is.na(!!sym("aggressive")) | is.na(!!sym("artist")))) %>%
-  pull(missing)
-dat.summary <- dat.summary %>%
-  ungroup() %>%
-  add_row(`:=`(!!sym("artist"), "Rows with Missing Data"), Observations = missing.obs, Mean = NA, `Standard Deviation` = NA, Min = NA, Q1 = NA, Median = NA, Q3 = NA, Max = NA, IQR = NA)
-####################################
-# Print Data Summary
-####################################
-dat.summary
-
-
-
-
-
-
-################ Plot 4
-# Load Data
-####################################
-dat <- read_csv("Final_Merged_df.csv")
-####################################
-# Select data for plot
-####################################
-df <- dat %>%
-  dplyr::select("happy", "artist") %>%
-  filter(!is.na(!!sym("artist")))
-####################################
-# Create Plot
-####################################
-plottt <- ggplot(df, aes(x = fct_rev(!!sym("artist")), y = !!sym("happy"))) +
-  geom_violin(fill = "darkorchid", trim = FALSE) +
-  geom_boxplot(fill = "white", width = 0.1) +
-  geom_jitter(color = "black", size = 0.4, alpha = 0.9, width = 0.125) +
-  get("theme_classic")() +
-  xlab("Happy") +
-  ylab("Artist") +
-  ggtitle("Happiness For Each Artist", "") +
-  coord_flip()
-####################################
-# Print Plot
-####################################
-plottt
-####################################
-# Summarize Data
-####################################
-dat.summary <- dat %>%
-  select(!!sym("happy"), !!sym("artist")) %>%
-  group_by(!!sym("artist")) %>%
-  summarize(Observations = sum(!is.na(!!sym("happy"))), Mean = mean(!!sym("happy"), na.rm = T), `Standard Deviation` = sd(!!sym("happy"), na.rm = T), Min = min(!!sym("happy"), na.rm = T), Q1 = quantile(!!sym("happy"), probs = 0.25, na.rm = T), Median = median(!!sym("happy"), na.rm = T), Q3 = quantile(!!sym("happy"), probs = 0.75, na.rm = T), Max = max(!!sym("happy"), na.rm = T), IQR = IQR(!!sym("happy"), na.rm = T)) %>%
-  filter(!is.na(!!sym("artist"))) %>%
-  tidyr::complete(!!sym("artist")) %>%
-  mutate_if(is.numeric, round, 4)
-missing.obs <- dat %>%
-  summarize(missing = sum(is.na(!!sym("happy")) | is.na(!!sym("artist")))) %>%
-  pull(missing)
-dat.summary <- dat.summary %>%
-  ungroup() %>%
-  add_row(`:=`(!!sym("artist"), "Rows with Missing Data"), Observations = missing.obs, Mean = NA, `Standard Deviation` = NA, Min = NA, Q1 = NA, Median = NA, Q3 = NA, Max = NA, IQR = NA)
-####################################
-# Print Data Summary
-####################################
-dat.summary
-
-# Save the violin plot as a PNG
-ggsave("violin_plot.png", plot = plottt, width = 8, height = 6, dpi = 300)
