@@ -56,23 +56,28 @@ tuning_frequency  <- JSON_Data |>
 
 ################ Step 2
 # artist album track
-df_notplot = data.frame(artist = character(), album = character(), track = character(), 
-                overall_loudness = numeric(), spectral_energy = numeric(),
-                dissonance = numeric(), danceability = numeric(),
-                pitch_salience = numeric(), bpm = numeric(),
-                beats_loudness = numeric(), tuning_frequency = numeric(),
-                stringsAsFactors = FALSE)
+#changes#
+#Changed my data frame to a tibble
+df_notplot <- tibble(
+  artist = character(), album = character(), track = character(),
+  overall_loudness = numeric(), spectral_energy = numeric(),
+  dissonance = numeric(), danceability = numeric(),
+  pitch_salience = numeric(), bpm = numeric(),
+  beats_loudness = numeric(), tuning_frequency = numeric()
+)
 # Create a data frame to save the results
 essentia_files <- list.files(path = "EssentiaOutput/")
 json_files_new <- essentia_files[str_count(essentia_files, ".json")==1]
-
+#changes#
+#Took out pastes that were not necessary
+#This step is already using tidyverse since it is using stringr which is a part of tidyverse
 for (i in 1:length(json_files_new)) {
-  current_filename = json_files_new[i]
-  split_Json_file <- str_split(current_filename, "-", simplify = TRUE)
-  song_name_with.json = (paste(split_Json_file[3]))
+  current_filename = json_files_new[i] 
+  split_Json_file <- str_split(current_filename, "-", simplify = TRUE) 
+  song_name_with.json = (split_Json_file[3])
   track <- str_sub(song_name_with.json, 1, str_length(song_name_with.json) - 5)
-  artist = (paste(split_Json_file[1]))
-  album = (paste(split_Json_file[2]))
+  artist = (split_Json_file[1])
+  album = (split_Json_file[2])
   # remove .json from the song
   # save artist/album/track
   
@@ -80,28 +85,46 @@ for (i in 1:length(json_files_new)) {
 
   # Read in the file as JSON_DataVie  JSON_Data_New <- fromJSON(paste("json_files_new","/", i, sep =""))
   JSON_Data_New <- fromJSON(paste0("EssentiaOutput/",current_filename))
+#changes#
+#Used the pluck() function and introduced pipes
+  overall_loudness  <- JSON_Data_New |> 
+    pluck("lowlevel", "loudness_ebu128", "integrated")
+  spectral_energy   <- JSON_Data_New |>
+    pluck("lowlevel", "spectral_energy")
+  dissonance        <- JSON_Data_New |>
+    pluck("lowlevel", "dissonance")
+  danceability      <- JSON_Data_New |>
+    pluck("rhythm", "danceability")
+  pitch_salience    <- JSON_Data_New |>
+    pluck("lowlevel", "pitch_salience")
+  bpm               <- JSON_Data_New |>
+    pluck("rhythm", "bpm")
+  beats_loudness    <- JSON_Data_New |>
+    pluck("rhythm", "beats_loudness")
+  tuning_frequency  <- JSON_Data_New |>
+    pluck("tonal", "tuning_frequency")
   
-  overall_loudness = JSON_Data_New$lowlevel$loudness_ebu128$integrated
-  spectral_energy = JSON_Data_New$lowlevel$spectral_energy
-  dissonance = JSON_Data_New$lowlevel$dissonance
-  danceability = JSON_Data_New$rhythm$danceability
-  pitch_salience = JSON_Data_New$lowlevel$pitch_salience
-  bpm = JSON_Data_New$rhythm$bpm
-  beats_loudness = JSON_Data_New$rhythm$beats_loudness
-  tuning_frequency = JSON_Data_New$tonal$tuning_frequency
-  
-  # Save the results to the ith row of the data frame
-  df_notplot <- rbind(df_notplot, data.frame(artist = artist, album = album, track = track, 
-                             overall_loudness = overall_loudness, spectral_energy = spectral_energy,
-                             dissonance = dissonance, danceability = danceability,
-                             pitch_salience = pitch_salience, bpm = bpm,
-                             beats_loudness = beats_loudness, tuning_frequency = tuning_frequency,
-                             stringsAsFactors = FALSE))
+# Save the results to the ith row of the data frame
+#changes#
+#Changed data frame to a tibble and used bind_rows() instead of rbind()
+#Removed column renaming since doing the dataframe this way solved the 
+#issue which caused me to have to rename some columns in the first place
+  df_notplot <- df_notplot %>%
+    bind_rows(tibble(
+      artist = artist, 
+      album = album, 
+      track = track, 
+      overall_loudness = as.numeric(overall_loudness), 
+      spectral_energy = as.numeric(spectral_energy),
+      dissonance = as.numeric(dissonance), 
+      danceability = as.numeric(danceability),
+      pitch_salience = as.numeric(pitch_salience), 
+      bpm = as.numeric(bpm),
+      beats_loudness = as.numeric(beats_loudness), 
+      tuning_frequency = as.numeric(tuning_frequency)
+    ))
 }
-colnames(df_notplot)[colnames(df_notplot) == "mean"] = "spectral_energy"
-colnames(df_notplot)[colnames(df_notplot) == "mean.1"] = "dissonance"
-colnames(df_notplot)[colnames(df_notplot) == "mean.2"] = "pitch_salience"
-colnames(df_notplot)[colnames(df_notplot) == "mean.3"] = "beats_loudness"
+
 
 ################ Step 3 Part 1
 Essentia_Output_Original <- read.csv("EssentiaOutput/EssentiaModelOutput.csv")
