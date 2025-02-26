@@ -214,6 +214,7 @@ Final_Merged_df <- Merged_df_1 |>
     rename(funct = `function`)
 
 @
+\nocite{jsonlite}
 \end{enumerate}
 \bibliography{bibliography}
 \end{document}
